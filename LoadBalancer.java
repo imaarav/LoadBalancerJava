@@ -60,7 +60,7 @@ class LoadBalancer
 				setRoute(v, lineN, lB.route);
 				cnt++;
 				
-				if (cnt >= 4230)
+				if (cnt >= 124230)
 				{
 					sc.close();
 					System.exit(0);
@@ -156,8 +156,6 @@ class LoadBalancer
 		try
 		{
 			pw = new PrintWriter(new FileWriter(outputFile,true)); //the true will append the new data
-			//fw.write("sec " + Integer.toString(i) + ":" + "Route A =" + Integer.toString(route[0].getCurrentLoadBytes()) + " " + "Route B =" + Integer.toString(route[1].getCurrentLoadBytes()) + " " + "Route C =" + Integer.toString(route[2].getCurrentLoadBytes()) + " " + "Route D =" + Integer.toString(route[3].getCurrentLoadBytes()) + String.format("%n"));
-			//pw.write("sec " + Integer.toString(i) + ":" + "    A = " + String.valueOf(p1) + " %" + "    B = " + String.valueOf(p2) + " %" + "    C = " + String.valueOf(p3) + " %" + "    D = " + String.valueOf(p4) + " %" + String.format("%n"));
 			pw.printf("sec %02d:  A = %.2f  B = %.2f  C = %.2f  D = %.2f \r\n", i, p1, p2, p3, p4);
 			pw.close();
 		}catch(Exception e){pw.close();}
