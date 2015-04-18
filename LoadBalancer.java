@@ -5,11 +5,17 @@ class LoadBalancer
 {
 	
 	DataRoute[] route;
+	HashMap<String, Character> hm;
+	File inputFile;
+	File outputFile;
 	
 	public LoadBalancer()
 	{
 		this.route = new DataRoute[4];
-						
+		hm = new HashMap<String, Character>();
+		inputFile = new File(System.getProperty("user.dir"), "packetlist.txt"); //joining 2 paths
+		outputFile = new File(System.getProperty("user.dir"), "output.txt");
+		
 		for(int i = 0; i < 4; i++) 
 		{
 			route[i] = new DataRoute();
@@ -19,64 +25,51 @@ class LoadBalancer
 	public static void main(String[] args)
 	{
 		LoadBalancer lB = new LoadBalancer();
-
 		int cnt = 1;
 		int i = 0;
-		
-		HashMap<String, Character> hm = new HashMap<String, Character>();
 		Scanner sc = null;
-		
 		try
 		{
-			sc = new Scanner(new File("C:\\Users\\khushboo\\Desktop\\desk on 4.3\\project om\\New folder\\packetlist.txt"));
-			File outputFile= new File("C:\\Users\\khushboo\\Desktop\\desk on 4.3\\project om\\New folder\\output.txt");
-			String line;
+			sc = new Scanner(lB.inputFile);
 			
+			String line;
 			while ((line = sc.nextLine()) != null)
 			{
-				
-				LineParser lineN = new LineParser(line);
+				LineParser lineN = new LineParser(line);	
 				
 				if (lineN.getArvlTime()>=(float)i)
 				{
-					
-					float p1 = getPercentage(lB.route[0].getCurrentLoadBytes(), lB.route[1].getCurrentLoadBytes(), lB.route[2].getCurrentLoadBytes(), lB.route[3].getCurrentLoadBytes());
-					float p2 = getPercentage(lB.route[1].getCurrentLoadBytes(), lB.route[0].getCurrentLoadBytes(), lB.route[2].getCurrentLoadBytes(), lB.route[3].getCurrentLoadBytes());
-					float p3 = getPercentage(lB.route[2].getCurrentLoadBytes(), lB.route[0].getCurrentLoadBytes(), lB.route[1].getCurrentLoadBytes(), lB.route[3].getCurrentLoadBytes());
-					float p4 = getPercentage(lB.route[3].getCurrentLoadBytes(), lB.route[0].getCurrentLoadBytes(), lB.route[1].getCurrentLoadBytes(), lB.route[2].getCurrentLoadBytes());
-					
-					fileWrite(outputFile, i, p1, p2, p3, p4);
+					float[] p = getPercentageAll(lB.route);
+					fileWrite(lB.outputFile, i, p);
 					i++;
 				}
 				
-				Character v = checkHashmap(hm, lineN);
-				
+				Character v = checkHashmap(lB.hm, lineN.getHashKey());
 				if(v.toString().equals("x"))
 				{
 					v = getRoute(lB.route);
-					hm.put(Integer.toString(lineN.getSrcHost()) + "*" + Integer.toString(lineN.getDestHost()) + "*" + Integer.toString(lineN.getSrcPort()) + "*" + Integer.toString(lineN.getDestPort()), v);
+					lB.hm.put(lineN.getHashKey(), v);
 				}
 				
 				setRoute(v, lineN, lB.route);
 				cnt++;
 				
-				if (cnt >= 124230)
+				if (cnt >= 4230)
 				{
 					sc.close();
 					System.exit(0);
 				} 
-				
 			}
 			sc.close();
+			
 		}catch (Exception e){sc.close();}
 	}
 	
-	public static Character checkHashmap(HashMap<String, Character> hm, LineParser lineN )
+	public static Character checkHashmap(HashMap<String, Character> hm, String hashKey)
 	{
-		String lineNhash = (Integer.toString(lineN.getSrcHost()) + "*" + Integer.toString(lineN.getDestHost()) + "*" + Integer.toString(lineN.getSrcPort()) + "*" + Integer.toString(lineN.getDestPort()));
 		for (String key: hm.keySet())
 		{
-			if (lineNhash.equals(key))
+			if (hashKey.equals(key))
 			{
 				Character v = hm.get(key);
 				return v;
@@ -139,6 +132,16 @@ class LoadBalancer
 			route[0].addLoad(lineN.getPktLength());
 	}
 	
+	public static float[] getPercentageAll(DataRoute[] route)
+	{
+		float[] p = new float[4];
+		p[0] = getPercentage(route[0].getCurrentLoadBytes(), route[1].getCurrentLoadBytes(), route[2].getCurrentLoadBytes(), route[3].getCurrentLoadBytes());
+		p[1] = getPercentage(route[1].getCurrentLoadBytes(), route[0].getCurrentLoadBytes(), route[2].getCurrentLoadBytes(), route[3].getCurrentLoadBytes());
+		p[2] = getPercentage(route[2].getCurrentLoadBytes(), route[0].getCurrentLoadBytes(), route[1].getCurrentLoadBytes(), route[3].getCurrentLoadBytes());
+		p[3] = getPercentage(route[3].getCurrentLoadBytes(), route[0].getCurrentLoadBytes(), route[1].getCurrentLoadBytes(), route[2].getCurrentLoadBytes());
+		return p;
+	}
+	
 	public static float getPercentage(int a, int b, int c, int d)
 	{
 		float p;
@@ -150,13 +153,13 @@ class LoadBalancer
 		return p;
 	}
 	
-	public static void fileWrite(File outputFile, int i, float p1, float p2, float p3, float p4)
+	public static void fileWrite(File outputFile, int i, float[] p)
 	{
 		PrintWriter pw = null;
 		try
 		{
 			pw = new PrintWriter(new FileWriter(outputFile,true)); //the true will append the new data
-			pw.printf("sec %02d:  A = %.2f  B = %.2f  C = %.2f  D = %.2f \r\n", i, p1, p2, p3, p4);
+			pw.printf("sec %02d:  A = %.2f  B = %.2f  C = %.2f  D = %.2f \r\n", i, p[0], p[1], p[2], p[3]);
 			pw.close();
 		}catch(Exception e){pw.close();}
 	}

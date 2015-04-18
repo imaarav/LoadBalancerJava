@@ -6,7 +6,7 @@ public class LineParser
 	private int srcPort;
 	private int destPort;
 	private int pktLength;
-	//String route;
+	private String hashKey;
 	
 	public LineParser (String line)
 	{
@@ -17,7 +17,7 @@ public class LineParser
 		this.srcPort = Integer.parseInt(elements[3]);
 		this.destPort = Integer.parseInt(elements[4]);
 		this.pktLength = Integer.parseInt(elements[5]);
-		//this.route = "xx";
+		this.hashKey = Integer.toString(this.getSrcHost()) + "*" + Integer.toString(this.getDestHost()) + "*" + Integer.toString(this.getSrcPort()) + "*" + Integer.toString(this.getDestPort());
 	}
 	
 	float getArvlTime()
@@ -48,6 +48,11 @@ public class LineParser
 	int getPktLength()
 	{
 		return this.pktLength;
+	}
+	
+	String getHashKey()
+	{
+		return this.hashKey;
 	}
 	
 }
