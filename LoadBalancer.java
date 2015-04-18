@@ -24,15 +24,14 @@ class LoadBalancer
 	
 	public static void main(String[] args)
 	{
-		LoadBalancer lB = new LoadBalancer();
-		int cnt = 1;
 		int i = 0;
+		int cnt = 1;
+		String line;
+		LoadBalancer lB = new LoadBalancer();
 		Scanner sc = null;
 		try
 		{
 			sc = new Scanner(lB.inputFile);
-			
-			String line;
 			while ((line = sc.nextLine()) != null)
 			{
 				LineParser lineN = new LineParser(line);	
@@ -52,8 +51,8 @@ class LoadBalancer
 				}
 				
 				setRoute(v, lineN, lB.route);
-				cnt++;
 				
+				cnt++;
 				if (cnt >= 4230)
 				{
 					sc.close();
