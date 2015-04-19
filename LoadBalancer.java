@@ -8,6 +8,7 @@ class LoadBalancer
 	HashMap<String, Character> hm;
 	File inputFile;
 	File outputFile;
+	static int milliSec;
 	
 	public LoadBalancer()
 	{
@@ -25,43 +26,62 @@ class LoadBalancer
 	public static void main(String[] args)
 	{
 		int i = 0;
-		int cnt = 1;
+		//int cnt = 1;
 		String line;
 		LoadBalancer lB = new LoadBalancer();
 		Scanner sc = null;
 		try
 		{
 			sc = new Scanner(lB.inputFile);
+			timerMethod();
+			
 			while ((line = sc.nextLine()) != null)
 			{
+				
 				LineParser lineN = new LineParser(line);	
-				
-				if (lineN.getArvlTime()>=(float)i)
+				while(lineN.getArvlTime() >= ((float)milliSec/1000))
 				{
-					float[] p = getPercentageAll(lB.route);
-					fileWrite(lB.outputFile, i, p);
-					i++;
+					if (lineN.getArvlTime()>=(float)i)
+					{
+						float[] p = getPercentageAll(lB.route);
+						fileWrite(lB.outputFile, i, p);
+						i++;
+					}
+				
+					Character v = checkHashmap(lB.hm, lineN.getHashKey());
+					if(v.toString().equals("x"))
+					{
+						v = getRoute(lB.route);
+						lB.hm.put(lineN.getHashKey(), v);
+					}
+				
+					setRoute(v, lineN, lB.route);
+				
+					/* cnt++;
+					if (cnt >= 4230)
+					{
+						sc.close();
+						System.exit(0);
+					} */
 				}
 				
-				Character v = checkHashmap(lB.hm, lineN.getHashKey());
-				if(v.toString().equals("x"))
-				{
-					v = getRoute(lB.route);
-					lB.hm.put(lineN.getHashKey(), v);
-				}
-				
-				setRoute(v, lineN, lB.route);
-				
-				cnt++;
-				if (cnt >= 4230)
-				{
-					sc.close();
-					System.exit(0);
-				} 
 			}
 			sc.close();
 			
 		}catch (Exception e){sc.close();}
+	}
+	
+	public static void timerMethod()
+	{
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask(){
+			@Override
+			public void run()
+			{
+				milliSec++;
+			}
+		}, 0, 1);
+		
 	}
 	
 	public static Character checkHashmap(HashMap<String, Character> hm, String hashKey)
